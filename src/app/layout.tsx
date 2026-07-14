@@ -1,12 +1,17 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono, Inter, Merriweather } from "next/font/google";
 import localFont from "next/font/local";
+import { GooeyToaster } from "@/components/ui/goey-toaster";
 import "../styles/globals.css";
+import "goey-toast/styles.css";
 import { cn } from "@/lib/utils";
 
-const merriweatherHeading = Merriweather({ subsets: ['latin'], variable: '--font-heading' });
+const merriweatherHeading = Merriweather({
+  subsets: ["latin"],
+  variable: "--font-heading",
+});
 
-const inter = Inter({ subsets: ['latin'], variable: '--font-sans' });
+const inter = Inter({ subsets: ["latin"], variable: "--font-sans" });
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -47,9 +52,11 @@ export default function RootLayout({
         merriweatherHeading.variable,
         advercase.variable
       )}
-
     >
-      <body className="min-h-full flex flex-col">{children}</body>
+      <body className="min-h-full flex flex-col">
+        {children}
+        <GooeyToaster position="top-center" showProgress closeButton="top-right" />
+      </body>
     </html>
   );
 }
