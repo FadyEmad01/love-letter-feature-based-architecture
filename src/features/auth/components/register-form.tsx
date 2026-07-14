@@ -100,7 +100,7 @@ export default function RegisterForm() {
   const passwordError = form.formState.errors.password?.message;
 
   return (
-    <div className="flex flex-col gap-6 relative z-[100]">
+    <div className="flex flex-col gap-6 relative z-100">
       <form onSubmit={form.handleSubmit(onSubmit)}>
         <FieldGroup>
           <div className="flex flex-col items-start gap-2 text-start">
