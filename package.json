@@ -9,10 +9,14 @@
     "lint": "biome check",
     "format": "biome format --write",
     "lint:canonical": "tailwind-suggest-canonical-classes \"src/**/*.{ts,tsx}\" --css src/styles/globals.css --check",
-    "fix:canonical": "tailwind-suggest-canonical-classes \"src/**/*.{ts,tsx}\" --css src/styles/globals.css"
+    "fix:canonical": "tailwind-suggest-canonical-classes \"src/**/*.{ts,tsx}\" --css src/styles/globals.css",
+    "drizzle:generate": "drizzle-kit generate",
+    "drizzle:push": "drizzle-kit push",
+    "drizzle:migrate": "drizzle-kit migrate"
   },
   "dependencies": {
     "@better-auth/drizzle-adapter": "^1.6.23",
+    "@better-auth/infra": "^0.3.6",
     "@hookform/resolvers": "^5.4.0",
     "@neondatabase/serverless": "^1.1.0",
     "@tanstack/react-query": "^5.101.2",

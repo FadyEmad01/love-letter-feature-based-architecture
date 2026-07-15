@@ -17,7 +17,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Spinner } from "@/components/ui/spinner";
 import { PasswordField } from "@/features/auth/components/password-field";
-import { authClient } from "@/features/auth/lib/client";
+import { authClient } from "@/features/auth/lib/auth-client";
 import {
   registerSchema,
   type RegisterInput,

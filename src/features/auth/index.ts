@@ -1,5 +1,5 @@
-export { auth, type Session } from "./api/auth";
-export { authClient, signIn, signUp, signOut, useSession } from "./lib/client";
+export { auth, type Session } from "./lib/auth";
+export { authClient, signIn, signUp, signOut, useSession } from "./lib/auth-client";
 export {
   loginSchema,
   type LoginInput,

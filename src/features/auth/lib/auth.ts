@@ -17,8 +17,8 @@ export const auth = betterAuth({
     updateAge: 60 * 60 * 24,
   },
   trustedOrigins: [
-    "http://localhost:3000",
-    "https://localhost:3000",
+    process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000",
+    "https://lovely-letter.vercel.app",
   ],
 });
 

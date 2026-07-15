@@ -56,25 +56,25 @@ src/
 │
 ├── features/                 # BUSINESS DOMAINS (80–90% of app code)
 │   ├── auth/                 # Authentication Feature
-│   │   ├── api/              # Better-Auth server configuration & helpers
-│   │   ├── components/       # Sign-in / Sign-up forms
-│   │   ├── hooks/            # Better-Auth client hooks (useSession, etc.)
-│   │   ├── schema.ts         # Auth-related Drizzle tables (users, sessions, accounts)
-│   │   └── index.ts          # Auth public API exports
+│   │   ├── lib/              # Auth config: auth.ts (server), auth-client.ts (client), validation.ts
+│   │   ├── components/       # Login/Register forms, PasswordField, SignOutButton
+│   │   ├── schema.ts         # Auth Drizzle tables (user, session, account, verification)
+│   │   └── index.ts          # Barrel exports
 │   └── [feature-name]/
 │       ├── components/       # Feature UI
 │       ├── hooks/            # Feature hooks (Zustand stores, TanStack Query)
 │       ├── api/              # Server Actions & fetch logic
 │       ├── schema.ts         # Feature-specific Drizzle schema definitions
-│       ├── types/            # Scoped TypeScript definitions
 │       └── index.ts          # Public API barrel file
 │
 ├── lib/                      # UTILITIES (Shared database connection, cn util)
 │   ├── db.ts                 # Global Drizzle/Neon DB client instance
 │   └── utils.ts              # cn() helper (clsx + tailwind-merge)
 │
-└── styles/                   # CSS (Tailwind v4 theme + custom properties)
-    └── globals.css
+├── styles/                   # CSS (Tailwind v4 theme + custom properties)
+│   └── globals.css
+
+└── proxy.ts                  # Route protection (Next.js 16 — replaces middleware.ts)
 ```
 
 ---
@@ -154,34 +154,58 @@ This strictly preserves the "Delete Test" — removing a feature removes its sch
 
 ### Neon DB Instance
 
-The global Drizzle client instance lives in `src/lib/db.ts`:
+The global Drizzle client instance lives in `src/lib/db.ts`. Uses `drizzle-orm/neon-http` directly:
 
 ```ts
 // src/lib/db.ts
-import { neon } from '@neondatabase/serverless';
 import { drizzle } from 'drizzle-orm/neon-http';
 
-const sql = neon(process.env.DATABASE_URL!);
-export const db = drizzle(sql);
+export const db = drizzle(process.env.DATABASE_URL!);
 ```
 
 ### Better-Auth Setup
 
 | Layer | Location | Responsibility |
 |-------|----------|---------------|
-| **Server config** | `src/features/auth/api/auth.ts` | Better-Auth instance, plugin configuration, Drizzle adapter |
-| **Client instance** | `src/features/auth/hooks/use-auth.ts` | Better-Auth client for use in React components |
+| **Server config** | `src/features/auth/lib/auth.ts` | Better-Auth instance, plugin configuration, Drizzle adapter |
+| **Client instance** | `src/features/auth/lib/auth-client.ts` | Better-Auth client (`createAuthClient`) for React components |
 | **API route** | `src/app/api/auth/[...all]/route.ts` | **Thin wrapper only** — forwards requests to the auth instance |
 
-The API route handler is purely a pass-through:
+The API route handler is purely a pass-through using `toNextJsHandler`:
 
 ```ts
 // src/app/api/auth/[...all]/route.ts
 import { auth } from '@/features/auth';
-import { toNextHandler } from 'better-auth/next-js';
+import { toNextJsHandler } from 'better-auth/next-js';
 
-export const { GET, POST } = toNextHandler(auth);
+export const { GET, POST } = toNextJsHandler(auth);
 ```
+
+### Route Protection (proxy.ts)
+
+Next.js 16 replaces `middleware.ts` with `proxy.ts`. This project uses an **optimistic cookie check** — the full session is validated in each page/route handler:
+
+```ts
+// src/proxy.ts
+import { NextRequest, NextResponse } from "next/server";
+import { getSessionCookie } from "better-auth/cookies";
+
+export async function proxy(request: NextRequest) {
+  const sessionCookie = getSessionCookie(request);
+
+  if (!sessionCookie) {
+    return NextResponse.redirect(new URL("/auth/login", request.url));
+  }
+
+  return NextResponse.next();
+}
+
+export const config = {
+  matcher: ["/dashboard/:path*"],
+};
+```
+
+This protects all `/dashboard/*` routes. Unauthenticated users are redirected to `/auth/login`. Each dashboard page still validates the full session server-side.
 
 ---
 
@@ -232,8 +256,8 @@ npm run format    # biome format --write
 npm install
 
 # Set up environment variables
-cp .env.example .env.local
-# Edit .env.local with your Neon DB URL and Better-Auth secrets
+cp .env.example .env
+# Edit .env with your Neon DB URL and Better-Auth secrets
 
 # Run development server
 npm run dev
@@ -251,3 +275,6 @@ npm run dev
 | `npm run start` | Start production server |
 | `npm run lint` | Run Biome linter |
 | `npm run format` | Format code with Biome |
+| `npm run drizzle:generate` | Generate Drizzle migration files |
+| `npm run drizzle:push` | Push schema changes to database |
+| `npm run drizzle:migrate` | Run pending database migrations |
