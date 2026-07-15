@@ -1,13 +1,20 @@
-import { betterAuth } from "better-auth";
 import { drizzleAdapter } from "@better-auth/drizzle-adapter";
-import { db } from "@/lib/db";
-import { user, session, account, verification, relations } from "../schema";
 import { dash } from "@better-auth/infra";
+import { betterAuth } from "better-auth";
+import { db } from "@/lib/db";
+import {
+  account,
+  rateLimit,
+  relations,
+  session,
+  user,
+  verification,
+} from "../schema";
 
 export const auth = betterAuth({
   database: drizzleAdapter(db, {
     provider: "pg",
-    schema: { user, session, account, verification, relations },
+    schema: { user, session, account, verification, rateLimit, relations },
   }),
   // experimental: { joins: true },
   emailAndPassword: {
@@ -26,8 +33,8 @@ export const auth = betterAuth({
     dash({
       apiUrl: process.env.BETTER_AUTH_URL,
       apiKey: process.env.BETTER_AUTH_API_KEY,
-    })
-  ]
+    }),
+  ],
 });
 
 export type Session = typeof auth.$Infer.Session;
