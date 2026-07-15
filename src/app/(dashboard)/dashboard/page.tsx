@@ -1,6 +1,6 @@
-import { auth } from "@/features/auth";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
+import { auth } from "@/features/auth";
 import { SignOutButton } from "@/features/auth/components/sign-out-button";
 
 export default async function DashboardPage() {

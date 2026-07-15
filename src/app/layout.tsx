@@ -50,12 +50,16 @@ export default function RootLayout({
         geistMono.variable,
         inter.variable,
         merriweatherHeading.variable,
-        advercase.variable
+        advercase.variable,
       )}
     >
       <body className="min-h-full flex flex-col">
         {children}
-        <GooeyToaster position="top-center" showProgress closeButton="top-right" />
+        <GooeyToaster
+          position="top-center"
+          showProgress
+          closeButton="top-right"
+        />
       </body>
     </html>
   );

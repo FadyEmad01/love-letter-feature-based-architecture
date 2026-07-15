@@ -8,9 +8,9 @@ export default function NoiseOverlay() {
         style={{
           backgroundImage: 'url("/texture/noise.webp")',
           // Forces the grain to be the same size on all screen sizes
-          backgroundSize: '200px', 
+          backgroundSize: "200px",
           // Tells the browser to use GPU acceleration for the animation
-          willChange: 'transform', 
+          willChange: "transform",
         }}
       />
     </div>

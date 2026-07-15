@@ -1,11 +1,11 @@
 "use client";
 
+import { zodResolver } from "@hookform/resolvers/zod";
+import { goeyToast } from "goey-toast";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { goeyToast } from "goey-toast";
 import { Button } from "@/components/ui/button";
 import {
   Field,
@@ -18,7 +18,7 @@ import { Input } from "@/components/ui/input";
 import { Spinner } from "@/components/ui/spinner";
 import { PasswordField } from "@/features/auth/components/password-field";
 import { authClient } from "@/features/auth/lib/auth-client";
-import { loginSchema, type LoginInput } from "@/features/auth/lib/validation";
+import { type LoginInput, loginSchema } from "@/features/auth/lib/validation";
 
 const toastStyle = {
   spring: false,
@@ -127,6 +127,7 @@ export default function LoginForm() {
               aria-invalid={!!passwordError}
               showStrength={false}
             />
+            <FieldError>{passwordError}</FieldError>
           </Field>
 
           <Button type="submit" className="w-full" disabled={isLoading}>
@@ -135,8 +136,7 @@ export default function LoginForm() {
         </FieldGroup>
       </form>
       <FieldDescription className="text-center">
-        Don&apos;t have an account?{" "}
-        <Link href="/auth/register">Sign up</Link>
+        Don&apos;t have an account? <Link href="/auth/register">Sign up</Link>
       </FieldDescription>
     </div>
   );

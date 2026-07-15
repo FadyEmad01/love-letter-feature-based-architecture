@@ -1,11 +1,11 @@
 "use client";
 
+import { zodResolver } from "@hookform/resolvers/zod";
+import { goeyToast } from "goey-toast";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { goeyToast } from "goey-toast";
 import { Button } from "@/components/ui/button";
 import {
   Field,
@@ -19,8 +19,8 @@ import { Spinner } from "@/components/ui/spinner";
 import { PasswordField } from "@/features/auth/components/password-field";
 import { authClient } from "@/features/auth/lib/auth-client";
 import {
-  registerSchema,
   type RegisterInput,
+  registerSchema,
 } from "@/features/auth/lib/validation";
 
 const toastStyle = {
@@ -152,8 +152,7 @@ export default function RegisterForm() {
         </FieldGroup>
       </form>
       <FieldDescription className="text-center">
-        Already have an account?{" "}
-        <Link href="/auth/login">Sign in</Link>
+        Already have an account? <Link href="/auth/login">Sign in</Link>
       </FieldDescription>
     </div>
   );

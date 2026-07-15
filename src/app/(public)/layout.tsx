@@ -14,7 +14,7 @@ export default function PublicLayout({
   return (
     <>
       {children}
-      <NoiseOverlay/>
+      <NoiseOverlay />
     </>
   );
 }

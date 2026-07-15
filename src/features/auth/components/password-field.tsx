@@ -24,7 +24,8 @@ export function PasswordField({
   placeholder = "********",
   className,
   ...props
-}: PasswordFieldProps & Omit<React.ComponentProps<"input">, "id" | "value" | "onChange" | "type">) {
+}: PasswordFieldProps &
+  Omit<React.ComponentProps<"input">, "id" | "value" | "onChange" | "type">) {
   const generatedId = useId();
   const id = externalId || generatedId;
   const [isVisible, setIsVisible] = useState(false);
@@ -44,14 +45,6 @@ export function PasswordField({
   }));
 
   const strengthScore = strength.filter((r) => r.met).length;
-
-  const getStrengthColor = (score: number) => {
-    if (score === 0) return "bg-border";
-    if (score <= 1) return "bg-red-500";
-    if (score <= 2) return "bg-orange-500";
-    if (score === 3) return "bg-amber-500";
-    return "bg-emerald-500";
-  };
 
   const getStrengthText = (score: number) => {
     if (score === 0) return "Enter a password";
@@ -116,11 +109,24 @@ export function PasswordField({
             {strength.map((req) => (
               <li className="flex items-center gap-2" key={req.text}>
                 {req.met ? (
-                  <CheckIcon aria-hidden="true" size={16} className="shrink-0 text-emerald-500" />
+                  <CheckIcon
+                    aria-hidden="true"
+                    size={16}
+                    className="shrink-0 text-emerald-500"
+                  />
                 ) : (
-                  <XIcon aria-hidden="true" size={16} className="shrink-0 text-muted-foreground/80" />
+                  <XIcon
+                    aria-hidden="true"
+                    size={16}
+                    className="shrink-0 text-muted-foreground/80"
+                  />
                 )}
-                <span className={cn("text-xs", req.met ? "text-emerald-600" : "text-muted-foreground")}>
+                <span
+                  className={cn(
+                    "text-xs",
+                    req.met ? "text-emerald-600" : "text-muted-foreground",
+                  )}
+                >
                   {req.text}
                   <span className="sr-only">
                     {req.met ? " - Requirement met" : " - Requirement not met"}
