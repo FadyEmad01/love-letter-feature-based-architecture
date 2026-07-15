@@ -18,10 +18,15 @@ export const auth = betterAuth({
     updateAge: 60 * 60 * 24,
   },
   trustedOrigins: [
-    process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000",
+    "http://localhost:3000",
     "https://lovely-letter.vercel.app",
-  ], plugins: [
-    dash()
+    "https://localhost:3000",
+  ],
+  plugins: [
+    dash({
+      apiUrl: process.env.BETTER_AUTH_URL,
+      apiKey: process.env.BETTER_AUTH_API_KEY,
+    })
   ]
 });
 
