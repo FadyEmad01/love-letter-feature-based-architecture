@@ -2,19 +2,12 @@ import { drizzleAdapter } from "@better-auth/drizzle-adapter";
 import { dash } from "@better-auth/infra";
 import { betterAuth } from "better-auth";
 import { db } from "@/lib/db";
-import {
-  account,
-  rateLimit,
-  relations,
-  session,
-  user,
-  verification,
-} from "../schema";
+import { account, rateLimit, session, user, verification } from "../schema";
 
 export const auth = betterAuth({
   database: drizzleAdapter(db, {
     provider: "pg",
-    schema: { user, session, account, verification, rateLimit, relations },
+    schema: { user, session, account, verification, rateLimit },
   }),
   // experimental: { joins: true },
   emailAndPassword: {
@@ -23,6 +16,10 @@ export const auth = betterAuth({
   session: {
     expiresIn: 60 * 60 * 24 * 7,
     updateAge: 60 * 60 * 24,
+    cookieCache: {
+      enabled: true,
+      maxAge: 5 * 60,
+    },
   },
   trustedOrigins: [
     "http://localhost:3000",
