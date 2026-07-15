@@ -35,8 +35,8 @@ yarn-error.log*
 !.env.example
 
 # editor / swarm state
-/.opencode
-/.swarm
+.opencode
+.swarm
 
 # vercel
 .vercel

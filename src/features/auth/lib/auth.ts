@@ -2,6 +2,7 @@ import { betterAuth } from "better-auth";
 import { drizzleAdapter } from "@better-auth/drizzle-adapter";
 import { db } from "@/lib/db";
 import { user, session, account, verification, relations } from "../schema";
+import { dash } from "@better-auth/infra";
 
 export const auth = betterAuth({
   database: drizzleAdapter(db, {
@@ -19,7 +20,9 @@ export const auth = betterAuth({
   trustedOrigins: [
     process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000",
     "https://lovely-letter.vercel.app",
-  ],
+  ], plugins: [
+    dash()
+  ]
 });
 
 export type Session = typeof auth.$Infer.Session;
