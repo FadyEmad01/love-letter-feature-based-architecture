@@ -26,6 +26,22 @@ export const auth = betterAuth({
     "https://lovely-letter.vercel.app",
     "https://localhost:3000",
   ],
+  rateLimit: {
+    enabled: true,
+    window: 60,
+    max: 100,
+    storage: "database",
+    customRules: {
+      "/sign-in/email": {
+        window: 60,
+        max: 5,
+      },
+      "/sign-up/email": {
+        window: 60,
+        max: 5,
+      },
+    },
+  },
   plugins: [
     dash({
       apiKey: process.env.BETTER_AUTH_API_KEY,

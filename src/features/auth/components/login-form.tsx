@@ -55,10 +55,18 @@ export default function LoginForm() {
       });
 
       if (error) {
+        const isRateLimited =
+          (error as { status?: number }).status === 429 ||
+          error?.message?.toLowerCase().includes("too many requests");
+
         goeyToast.update(toastId, {
           type: "error",
-          title: error?.message || "Something went wrong",
-          description: "Something went wrong, try again",
+          title: isRateLimited
+            ? "Too many attempts"
+            : error?.message || "Something went wrong",
+          description: isRateLimited
+            ? "You've made too many requests. Please wait a minute before trying again."
+            : "Something went wrong, try again",
           icon: null,
           ...toastStyle,
         });
@@ -79,10 +87,15 @@ export default function LoginForm() {
         err instanceof Error
           ? err.message
           : "Something went wrong. Please try again.";
+      const isRateLimited =
+        message.toLowerCase().includes("too many requests") ||
+        message.toLowerCase().includes("rate limit");
       goeyToast.update(toastId, {
         type: "error",
-        title: message,
-        description: "Something went wrong, try again",
+        title: isRateLimited ? "Too many attempts" : message,
+        description: isRateLimited
+          ? "You've made too many requests. Please wait a minute before trying again."
+          : "Something went wrong, try again",
         icon: null,
         ...toastStyle,
       });
