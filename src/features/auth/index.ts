@@ -1,4 +1,5 @@
 export { PasswordField } from "./components/password-field";
+export { SignOutButton } from "./components/sign-out-button";
 export { auth, type Session } from "./lib/auth";
 export {
   authClient,
