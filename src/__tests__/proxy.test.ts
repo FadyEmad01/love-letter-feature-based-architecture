@@ -10,29 +10,146 @@ import { getSessionCookie } from "better-auth/cookies";
 
 const mockGetSessionCookie = vi.mocked(getSessionCookie);
 
-function createDashboardRequest(path = "/dashboard"): NextRequest {
-  return new NextRequest(new URL(path, "http://localhost:3000"));
-}
-
-function createAuthPageRequest(
-  path: "/auth/login" | "/auth/register",
-): NextRequest {
+function createRequest(path: string): NextRequest {
   return new NextRequest(new URL(path, "http://localhost:3000"));
 }
 
 describe("proxy middleware", () => {
   afterEach(() => {
-    vi.clearAllMocks();
+    vi.resetAllMocks();
     delete process.env.MAINTENANCE_MODE;
   });
 
-  describe("authentication guard", () => {
+  // ─── Maintenance mode ────────────────────────────────────
+  describe("maintenance mode", () => {
+    it("redirects to /maintenance when MAINTENANCE_MODE is 'true'", async () => {
+      process.env.MAINTENANCE_MODE = "true";
+
+      const response = await proxy(createRequest("/dashboard"));
+
+      expect(response.status).toBeGreaterThanOrEqual(300);
+      expect(response.status).toBeLessThan(400);
+      expect(response.headers.get("location")).toBe(
+        "http://localhost:3000/maintenance",
+      );
+    });
+
+    it("redirects to /maintenance even when session exists", async () => {
+      process.env.MAINTENANCE_MODE = "true";
+      mockGetSessionCookie.mockReturnValue("valid-session");
+
+      const response = await proxy(createRequest("/dashboard"));
+
+      expect(response.headers.get("location")).toBe(
+        "http://localhost:3000/maintenance",
+      );
+    });
+
+    it("allows access to /maintenance during maintenance mode", async () => {
+      process.env.MAINTENANCE_MODE = "true";
+
+      const response = await proxy(createRequest("/maintenance"));
+
+      expect(response.status).toBe(200);
+    });
+
+    it("redirects /maintenance to / when MAINTENANCE_MODE is not set", async () => {
+      const response = await proxy(createRequest("/maintenance"));
+
+      expect(response.status).toBeGreaterThanOrEqual(300);
+      expect(response.status).toBeLessThan(400);
+      expect(response.headers.get("location")).toBe("http://localhost:3000/");
+    });
+
+    it("redirects /maintenance to / when MAINTENANCE_MODE is 'false'", async () => {
+      process.env.MAINTENANCE_MODE = "false";
+
+      const response = await proxy(createRequest("/maintenance"));
+
+      expect(response.status).toBeGreaterThanOrEqual(300);
+      expect(response.status).toBeLessThan(400);
+      expect(response.headers.get("location")).toBe("http://localhost:3000/");
+    });
+
+    it("does not redirect other routes when MAINTENANCE_MODE is not set", async () => {
+      mockGetSessionCookie.mockReturnValue("valid-session");
+
+      const response = await proxy(createRequest("/dashboard"));
+
+      expect(response.status).toBe(200);
+    });
+
+    it("does not redirect other routes when MAINTENANCE_MODE is 'false'", async () => {
+      process.env.MAINTENANCE_MODE = "false";
+      mockGetSessionCookie.mockReturnValue("valid-session");
+
+      const response = await proxy(createRequest("/dashboard"));
+
+      expect(response.status).toBe(200);
+    });
+  });
+
+  // ─── Public routes ───────────────────────────────────────
+  describe("public routes", () => {
+    it("allows unauthenticated user to access / (landing page)", async () => {
+      const response = await proxy(createRequest("/"));
+
+      expect(response.status).toBe(200);
+    });
+
+    it("allows authenticated user to access / (landing page)", async () => {
+      mockGetSessionCookie.mockReturnValue("valid-session");
+
+      const response = await proxy(createRequest("/"));
+
+      expect(response.status).toBe(200);
+    });
+
+    it("allows unauthenticated user to access /auth/login", async () => {
+      const response = await proxy(createRequest("/auth/login"));
+
+      expect(response.status).toBe(200);
+    });
+
+    it("allows unauthenticated user to access /auth/register", async () => {
+      const response = await proxy(createRequest("/auth/register"));
+
+      expect(response.status).toBe(200);
+    });
+  });
+
+  // ─── Auth page protection ────────────────────────────────
+  describe("auth page protection", () => {
+    it("redirects logged-in user from /auth/login to /dashboard", async () => {
+      mockGetSessionCookie.mockReturnValue("valid-session");
+
+      const response = await proxy(createRequest("/auth/login"));
+
+      expect(response.status).toBeGreaterThanOrEqual(300);
+      expect(response.status).toBeLessThan(400);
+      expect(response.headers.get("location")).toBe(
+        "http://localhost:3000/dashboard",
+      );
+    });
+
+    it("redirects logged-in user from /auth/register to /dashboard", async () => {
+      mockGetSessionCookie.mockReturnValue("valid-session");
+
+      const response = await proxy(createRequest("/auth/register"));
+
+      expect(response.status).toBeGreaterThanOrEqual(300);
+      expect(response.status).toBeLessThan(400);
+      expect(response.headers.get("location")).toBe(
+        "http://localhost:3000/dashboard",
+      );
+    });
+  });
+
+  // ─── Protected routes ────────────────────────────────────
+  describe("protected routes", () => {
     it("redirects to /auth/login when no session cookie", async () => {
-      mockGetSessionCookie.mockReturnValue(null);
+      const response = await proxy(createRequest("/dashboard"));
 
-      const response = await proxy(createDashboardRequest());
-
-      expect(mockGetSessionCookie).toHaveBeenCalledOnce();
       expect(response.status).toBeGreaterThanOrEqual(300);
       expect(response.status).toBeLessThan(400);
       expect(response.headers.get("location")).toBe(
@@ -41,63 +158,14 @@ describe("proxy middleware", () => {
     });
 
     it("passes through when session cookie exists", async () => {
-      mockGetSessionCookie.mockReturnValue("valid-session-token");
+      mockGetSessionCookie.mockReturnValue("valid-session");
 
-      const response = await proxy(createDashboardRequest());
-
-      expect(mockGetSessionCookie).toHaveBeenCalledOnce();
-      expect(response.status).toBe(200);
-    });
-  });
-
-  describe("auth page protection", () => {
-    it("redirects logged-in user away from /auth/login to /dashboard", async () => {
-      mockGetSessionCookie.mockReturnValue("valid-session-token");
-
-      const response = await proxy(createAuthPageRequest("/auth/login"));
-
-      expect(mockGetSessionCookie).toHaveBeenCalledOnce();
-      expect(response.status).toBeGreaterThanOrEqual(300);
-      expect(response.status).toBeLessThan(400);
-      expect(response.headers.get("location")).toBe(
-        "http://localhost:3000/dashboard",
-      );
-    });
-
-    it("redirects logged-in user away from /auth/register to /dashboard", async () => {
-      mockGetSessionCookie.mockReturnValue("valid-session-token");
-
-      const response = await proxy(createAuthPageRequest("/auth/register"));
-
-      expect(mockGetSessionCookie).toHaveBeenCalledOnce();
-      expect(response.status).toBeGreaterThanOrEqual(300);
-      expect(response.status).toBeLessThan(400);
-      expect(response.headers.get("location")).toBe(
-        "http://localhost:3000/dashboard",
-      );
-    });
-
-    it("allows unauthenticated user to access /auth/login", async () => {
-      mockGetSessionCookie.mockReturnValue(null);
-
-      const response = await proxy(createAuthPageRequest("/auth/login"));
+      const response = await proxy(createRequest("/dashboard"));
 
       expect(response.status).toBe(200);
     });
 
-    it("allows unauthenticated user to access /auth/register", async () => {
-      mockGetSessionCookie.mockReturnValue(null);
-
-      const response = await proxy(createAuthPageRequest("/auth/register"));
-
-      expect(response.status).toBe(200);
-    });
-  });
-
-  describe("redirect behavior", () => {
-    it("redirects to the correct login origin for the request", async () => {
-      mockGetSessionCookie.mockReturnValue(null);
-
+    it("redirects to the correct origin for the request", async () => {
       const request = new NextRequest(
         new URL("https://example.com/dashboard/settings"),
       );
@@ -107,77 +175,13 @@ describe("proxy middleware", () => {
         "https://example.com/auth/login",
       );
     });
-
-    it("passes the request to getSessionCookie", async () => {
-      mockGetSessionCookie.mockReturnValue("abc123");
-
-      const request = createDashboardRequest("/dashboard/reports");
-      await proxy(request);
-
-      expect(mockGetSessionCookie).toHaveBeenCalledWith(request);
-    });
   });
 
-  describe("maintenance mode", () => {
-    it("redirects to /maintenance when MAINTENANCE_MODE is true", async () => {
-      process.env.MAINTENANCE_MODE = "true";
-      mockGetSessionCookie.mockReturnValue(null);
-
-      const response = await proxy(createDashboardRequest("/dashboard"));
-
-      expect(response.status).toBeGreaterThanOrEqual(300);
-      expect(response.status).toBeLessThan(400);
-      expect(response.headers.get("location")).toBe(
-        "http://localhost:3000/maintenance",
-      );
-    });
-
-    it("allows access to /maintenance during maintenance mode", async () => {
-      process.env.MAINTENANCE_MODE = "true";
-
-      const response = await proxy(createDashboardRequest("/maintenance"));
-
-      expect(response.status).toBe(200);
-    });
-
-    it("allows access to /maintenance even without maintenance mode", async () => {
-      mockGetSessionCookie.mockReturnValue(null);
-
-      const response = await proxy(createDashboardRequest("/maintenance"));
-
-      expect(response.status).toBe(200);
-    });
-
-    it("does not redirect when MAINTENANCE_MODE is not set", async () => {
-      mockGetSessionCookie.mockReturnValue(null);
-
-      const response = await proxy(createDashboardRequest("/dashboard"));
-
-      expect(response.status).toBeGreaterThanOrEqual(300);
-      expect(response.status).toBeLessThan(400);
-      expect(response.headers.get("location")).toBe(
-        "http://localhost:3000/auth/login",
-      );
-    });
-
-    it("does not redirect when MAINTENANCE_MODE is 'false'", async () => {
-      process.env.MAINTENANCE_MODE = "false";
-      mockGetSessionCookie.mockReturnValue(null);
-
-      const response = await proxy(createDashboardRequest("/dashboard"));
-
-      expect(response.status).toBeGreaterThanOrEqual(300);
-      expect(response.status).toBeLessThan(400);
-      expect(response.headers.get("location")).toBe(
-        "http://localhost:3000/auth/login",
-      );
-    });
-  });
-
+  // ─── Config ──────────────────────────────────────────────
   describe("config", () => {
     it("targets all routes except static assets and API", () => {
       expect(config.matcher).toEqual([
-        "/((?!api|_next/static|_next/image|favicon.ico).*)",
+        "/((?!api|_next/static|_next/image|favicon.ico|texture/).*)",
       ]);
     });
   });

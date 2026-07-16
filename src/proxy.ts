@@ -4,34 +4,41 @@ import { type NextRequest, NextResponse } from "next/server";
 export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
-  // Maintenance mode — redirect everything except /maintenance itself
-  if (process.env.MAINTENANCE_MODE === "true" && pathname !== "/maintenance") {
-    return NextResponse.redirect(new URL("/maintenance", request.url));
+  // 1. Maintenance mode ON → only /maintenance is accessible
+  if (process.env.MAINTENANCE_MODE === "true") {
+    return pathname === "/maintenance"
+      ? NextResponse.next()
+      : NextResponse.redirect(new URL("/maintenance", request.url));
   }
 
-  // Maintenance page is always accessible (no auth required)
+  // 2. Maintenance mode OFF → /maintenance redirects home
   if (pathname === "/maintenance") {
+    return NextResponse.redirect(new URL("/", request.url));
+  }
+
+  // 3. Public routes → always accessible (no auth needed)
+  if (
+    pathname === "/" ||
+    pathname === "/auth/login" ||
+    pathname === "/auth/register"
+  ) {
+    const sessionCookie = getSessionCookie(request);
+
+    // Logged-in user on auth pages → dashboard
+    if (sessionCookie && pathname !== "/") {
+      return NextResponse.redirect(new URL("/dashboard", request.url));
+    }
+
     return NextResponse.next();
   }
 
+  // 4. Protected routes → require session
   const sessionCookie = getSessionCookie(request);
-
-  const isAuthPage =
-    pathname === "/auth/login" || pathname === "/auth/register";
-
-  // Already logged in trying to access login/register → redirect to dashboard
-  if (isAuthPage && sessionCookie) {
-    return NextResponse.redirect(new URL("/dashboard", request.url));
-  }
-
-  // Protected route without session → login
-  if (!isAuthPage && !sessionCookie) {
-    return NextResponse.redirect(new URL("/auth/login", request.url));
-  }
-
-  return NextResponse.next();
+  return sessionCookie
+    ? NextResponse.next()
+    : NextResponse.redirect(new URL("/auth/login", request.url));
 }
 
 export const config = {
-  matcher: ["/((?!api|_next/static|_next/image|favicon.ico).*)"],
+  matcher: ["/((?!api|_next/static|_next/image|favicon.ico|texture/).*)"],
 };

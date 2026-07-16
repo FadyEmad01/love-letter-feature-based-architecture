@@ -1,5 +1,13 @@
 "use client";
 
+import localFont from "next/font/local";
+import "../styles/globals.css";
+
+const advercase = localFont({
+  src: "../assets/fonts/Advercase-Regular.woff2",
+  variable: "--font-advercase",
+});
+
 export default function GlobalError({
   error,
   unstable_retry,
@@ -8,43 +16,21 @@ export default function GlobalError({
   unstable_retry: () => void;
 }) {
   return (
-    <html lang="en">
-      <body
-        style={{
-          minHeight: "100vh",
-          display: "flex",
-          flexDirection: "column",
-          alignItems: "center",
-          justifyContent: "center",
-          backgroundColor: "#efefe3",
-          fontFamily: "system-ui, sans-serif",
-          gap: "1rem",
-        }}
-      >
-        <h1
-          style={{
-            fontSize: "2rem",
-            fontWeight: 700,
-            fontFamily: "var(--font-advercase), system-ui, sans-serif",
-          }}
-        >
-          Something went wrong
-        </h1>
-        <p style={{ color: "#71717a" }}>{error.message}</p>
-        <button
-          type="button"
-          onClick={() => unstable_retry()}
-          style={{
-            padding: "0.5rem 1rem",
-            border: "1px solid #d4d4d8",
-            borderRadius: "0.5rem",
-            backgroundColor: "white",
-            cursor: "pointer",
-            fontSize: "0.875rem",
-          }}
-        >
-          Try Again
-        </button>
+    <html lang="en" className={advercase.variable}>
+      <body className="min-h-screen bg-background text-foreground font-sans antialiased">
+        <div className="flex h-screen w-full flex-col items-center justify-center gap-2">
+          <h1 className="text-[2rem] font-bold font-advercase tracking-wider">
+            Something went wrong
+          </h1>
+          <p className="text-muted-foreground font-sans">{error.message}</p>
+          <button
+            type="button"
+            onClick={() => unstable_retry()}
+            className="cursor-pointer rounded-lg border border-border bg-white px-3 py-1 text-sm"
+          >
+            Try Again
+          </button>
+        </div>
       </body>
     </html>
   );
