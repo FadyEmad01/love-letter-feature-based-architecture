@@ -3,9 +3,18 @@ import { type NextRequest, NextResponse } from "next/server";
 
 export async function proxy(request: NextRequest) {
   const sessionCookie = getSessionCookie(request);
+  const { pathname } = request.nextUrl;
 
-  // Optimistic cookie check — validates full session in each page/route handler
-  if (!sessionCookie) {
+  const isAuthPage =
+    pathname === "/auth/login" || pathname === "/auth/register";
+
+  // Already logged in trying to access login/register → redirect to dashboard
+  if (isAuthPage && sessionCookie) {
+    return NextResponse.redirect(new URL("/dashboard", request.url));
+  }
+
+  // Protected route without session → login
+  if (!isAuthPage && !sessionCookie) {
     return NextResponse.redirect(new URL("/auth/login", request.url));
   }
 
@@ -13,5 +22,5 @@ export async function proxy(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/dashboard/:path*"],
+  matcher: ["/dashboard/:path*", "/auth/login", "/auth/register"],
 };

@@ -14,6 +14,12 @@ function createDashboardRequest(path = "/dashboard"): NextRequest {
   return new NextRequest(new URL(path, "http://localhost:3000"));
 }
 
+function createAuthPageRequest(
+  path: "/auth/login" | "/auth/register",
+): NextRequest {
+  return new NextRequest(new URL(path, "http://localhost:3000"));
+}
+
 describe("proxy middleware", () => {
   afterEach(() => {
     vi.clearAllMocks();
@@ -43,6 +49,50 @@ describe("proxy middleware", () => {
     });
   });
 
+  describe("auth page protection", () => {
+    it("redirects logged-in user away from /auth/login to /dashboard", async () => {
+      mockGetSessionCookie.mockReturnValue("valid-session-token");
+
+      const response = await proxy(createAuthPageRequest("/auth/login"));
+
+      expect(mockGetSessionCookie).toHaveBeenCalledOnce();
+      expect(response.status).toBeGreaterThanOrEqual(300);
+      expect(response.status).toBeLessThan(400);
+      expect(response.headers.get("location")).toBe(
+        "http://localhost:3000/dashboard",
+      );
+    });
+
+    it("redirects logged-in user away from /auth/register to /dashboard", async () => {
+      mockGetSessionCookie.mockReturnValue("valid-session-token");
+
+      const response = await proxy(createAuthPageRequest("/auth/register"));
+
+      expect(mockGetSessionCookie).toHaveBeenCalledOnce();
+      expect(response.status).toBeGreaterThanOrEqual(300);
+      expect(response.status).toBeLessThan(400);
+      expect(response.headers.get("location")).toBe(
+        "http://localhost:3000/dashboard",
+      );
+    });
+
+    it("allows unauthenticated user to access /auth/login", async () => {
+      mockGetSessionCookie.mockReturnValue(null);
+
+      const response = await proxy(createAuthPageRequest("/auth/login"));
+
+      expect(response.status).toBe(200);
+    });
+
+    it("allows unauthenticated user to access /auth/register", async () => {
+      mockGetSessionCookie.mockReturnValue(null);
+
+      const response = await proxy(createAuthPageRequest("/auth/register"));
+
+      expect(response.status).toBe(200);
+    });
+  });
+
   describe("redirect behavior", () => {
     it("redirects to the correct login origin for the request", async () => {
       mockGetSessionCookie.mockReturnValue(null);
@@ -68,8 +118,12 @@ describe("proxy middleware", () => {
   });
 
   describe("config", () => {
-    it("targets /dashboard routes", () => {
-      expect(config.matcher).toEqual(["/dashboard/:path*"]);
+    it("targets dashboard and auth routes", () => {
+      expect(config.matcher).toEqual([
+        "/dashboard/:path*",
+        "/auth/login",
+        "/auth/register",
+      ]);
     });
   });
 });
