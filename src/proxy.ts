@@ -2,8 +2,19 @@ import { getSessionCookie } from "better-auth/cookies";
 import { type NextRequest, NextResponse } from "next/server";
 
 export async function proxy(request: NextRequest) {
-  const sessionCookie = getSessionCookie(request);
   const { pathname } = request.nextUrl;
+
+  // Maintenance mode — redirect everything except /maintenance itself
+  if (process.env.MAINTENANCE_MODE === "true" && pathname !== "/maintenance") {
+    return NextResponse.redirect(new URL("/maintenance", request.url));
+  }
+
+  // Maintenance page is always accessible (no auth required)
+  if (pathname === "/maintenance") {
+    return NextResponse.next();
+  }
+
+  const sessionCookie = getSessionCookie(request);
 
   const isAuthPage =
     pathname === "/auth/login" || pathname === "/auth/register";
@@ -22,5 +33,5 @@ export async function proxy(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/dashboard/:path*", "/auth/login", "/auth/register"],
+  matcher: ["/((?!api|_next/static|_next/image|favicon.ico).*)"],
 };

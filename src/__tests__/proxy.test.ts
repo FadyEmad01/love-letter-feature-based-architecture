@@ -23,6 +23,7 @@ function createAuthPageRequest(
 describe("proxy middleware", () => {
   afterEach(() => {
     vi.clearAllMocks();
+    delete process.env.MAINTENANCE_MODE;
   });
 
   describe("authentication guard", () => {
@@ -117,12 +118,66 @@ describe("proxy middleware", () => {
     });
   });
 
+  describe("maintenance mode", () => {
+    it("redirects to /maintenance when MAINTENANCE_MODE is true", async () => {
+      process.env.MAINTENANCE_MODE = "true";
+      mockGetSessionCookie.mockReturnValue(null);
+
+      const response = await proxy(createDashboardRequest("/dashboard"));
+
+      expect(response.status).toBeGreaterThanOrEqual(300);
+      expect(response.status).toBeLessThan(400);
+      expect(response.headers.get("location")).toBe(
+        "http://localhost:3000/maintenance",
+      );
+    });
+
+    it("allows access to /maintenance during maintenance mode", async () => {
+      process.env.MAINTENANCE_MODE = "true";
+
+      const response = await proxy(createDashboardRequest("/maintenance"));
+
+      expect(response.status).toBe(200);
+    });
+
+    it("allows access to /maintenance even without maintenance mode", async () => {
+      mockGetSessionCookie.mockReturnValue(null);
+
+      const response = await proxy(createDashboardRequest("/maintenance"));
+
+      expect(response.status).toBe(200);
+    });
+
+    it("does not redirect when MAINTENANCE_MODE is not set", async () => {
+      mockGetSessionCookie.mockReturnValue(null);
+
+      const response = await proxy(createDashboardRequest("/dashboard"));
+
+      expect(response.status).toBeGreaterThanOrEqual(300);
+      expect(response.status).toBeLessThan(400);
+      expect(response.headers.get("location")).toBe(
+        "http://localhost:3000/auth/login",
+      );
+    });
+
+    it("does not redirect when MAINTENANCE_MODE is 'false'", async () => {
+      process.env.MAINTENANCE_MODE = "false";
+      mockGetSessionCookie.mockReturnValue(null);
+
+      const response = await proxy(createDashboardRequest("/dashboard"));
+
+      expect(response.status).toBeGreaterThanOrEqual(300);
+      expect(response.status).toBeLessThan(400);
+      expect(response.headers.get("location")).toBe(
+        "http://localhost:3000/auth/login",
+      );
+    });
+  });
+
   describe("config", () => {
-    it("targets dashboard and auth routes", () => {
+    it("targets all routes except static assets and API", () => {
       expect(config.matcher).toEqual([
-        "/dashboard/:path*",
-        "/auth/login",
-        "/auth/register",
+        "/((?!api|_next/static|_next/image|favicon.ico).*)",
       ]);
     });
   });
