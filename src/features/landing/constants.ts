@@ -26,7 +26,8 @@ export const LANDING_CONTENT = {
 /** Animation timing constants (in ms or seconds — see usage) */
 export const ANIMATION_TIMING = {
   /** Duration of the ink intro before content reveal (ms) */
-  INTRO_DURATION: 4500,
+  INTRO_DURATION: 6000,
+  // INTRO_DURATION: 4500,
   /** Delay before container starts revealing (seconds) */
   CONTENT_DELAY: 6,
   /** Delay between child elements cascading (seconds) */
