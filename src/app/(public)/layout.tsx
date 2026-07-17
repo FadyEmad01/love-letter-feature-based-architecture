@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import NoiseOverlay from "@/components/background/NoiseOverlay";
+// import NoiseOverlay from "@/components/background/NoiseOverlay";
 
 export const metadata: Metadata = {
   title: "Create Next App",
@@ -14,7 +14,7 @@ export default function PublicLayout({
   return (
     <>
       {children}
-      <NoiseOverlay />
+      {/* <NoiseOverlay /> */}
     </>
   );
 }
