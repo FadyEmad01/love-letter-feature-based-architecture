@@ -39,18 +39,35 @@ const variantStyles = {
 } as const;
 
 // Top curtain reveal with your updated 6s timing orchestration
+// const container: Variants = {
+//   hidden: {
+//     opacity: 0,
+//     clipPath: "inset(0% 0% 100% 0% round 0px 0px 32px 32px)",
+//   },
+//   visible: {
+//     opacity: 1,
+//     clipPath: "inset(0% 0% 0% 0% round 0px 0px 32px 32px)",
+//     transition: {
+//       delay: 6, // Wait 6 seconds for the entire ink + logo intro
+//       staggerChildren: 0.1,
+//       delayChildren: 6.45, // Correctly synchronized to cascade text after curtain drops
+//       duration: 0.8,
+//       ease: [0.22, 1, 0.36, 1],
+//     },
+//   },
+// };
 const container: Variants = {
   hidden: {
     opacity: 0,
-    clipPath: "inset(0% 0% 100% 0% round 0px 0px 32px 32px)",
+    y: "-100%",
   },
   visible: {
     opacity: 1,
-    clipPath: "inset(0% 0% 0% 0% round 0px 0px 32px 32px)",
+    y: "0%",
     transition: {
-      delay: 6, // Wait 6 seconds for the entire ink + logo intro
+      delay: 6,
       staggerChildren: 0.1,
-      delayChildren: 6.45, // Correctly synchronized to cascade text after curtain drops
+      delayChildren: 6.45,
       duration: 0.8,
       ease: [0.22, 1, 0.36, 1],
     },
@@ -224,36 +241,38 @@ export function Hero05({
 
       {/* 2. Top Drop-Down Content Overlay Layer */}
       <motion.div
-        className="relative z-30 w-full bg-background/95 backdrop-blur-md shadow-2xl rounded-b-[2rem]"
+        className="relative z-30 w-full rounded-b-[2rem]"
         variants={animate ? container : undefined}
         initial={animate ? "hidden" : false}
         animate={animate ? "visible" : undefined}
       >
-        <div
-          className={cn(
-            "mx-auto grid max-w-7xl grid-cols-1 px-6 lg:grid-cols-12",
-            vs.copy,
-            vs.grid,
-          )}
-        >
-          <Reveal
-            active={animate}
-            className="flex lg:col-span-4 lg:col-start-1 lg:items-end lg:self-stretch"
-          >
-            {taglineElement}
-          </Reveal>
-
-          <Reveal
-            active={animate}
+        <div className="w-full bg-background/95 backdrop-blur-md shadow-2xl rounded-b-[2rem]">
+          <div
             className={cn(
-              "flex flex-col items-start lg:col-span-6 lg:col-start-7",
-              vs.header,
+              "mx-auto grid max-w-7xl grid-cols-1 px-6 lg:grid-cols-12",
+              vs.copy,
+              vs.grid,
             )}
           >
-            {titleElement}
-            {descriptionElement}
-            {ctasElement}
-          </Reveal>
+            <Reveal
+              active={animate}
+              className="flex lg:col-span-4 lg:col-start-1 lg:items-end lg:self-stretch"
+            >
+              {taglineElement}
+            </Reveal>
+
+            <Reveal
+              active={animate}
+              className={cn(
+                "flex flex-col items-start lg:col-span-6 lg:col-start-7",
+                vs.header,
+              )}
+            >
+              {titleElement}
+              {descriptionElement}
+              {ctasElement}
+            </Reveal>
+          </div>
         </div>
       </motion.div>
     </section>
