@@ -1,6 +1,7 @@
 "use client";
 
 import { CheckIcon, EyeIcon, EyeOffIcon, XIcon } from "lucide-react";
+import type { ComponentProps } from "react";
 import { useId, useState } from "react";
 
 import { Input } from "@/components/ui/input";
@@ -25,7 +26,7 @@ export function PasswordField({
   className,
   ...props
 }: PasswordFieldProps &
-  Omit<React.ComponentProps<"input">, "id" | "value" | "onChange" | "type">) {
+  Omit<ComponentProps<"input">, "id" | "value" | "onChange" | "type">) {
   const generatedId = useId();
   const id = externalId || generatedId;
   const [isVisible, setIsVisible] = useState(false);

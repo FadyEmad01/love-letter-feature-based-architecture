@@ -15,6 +15,34 @@ You must strictly adhere to the following architectural guidelines, folder layou
 * **Rule:** Do not extract code into global shared directories (`src/components/` or `src/lib/`) unless it is actively utilized by **at least two** distinct features.
 * **Guideline:** Prefer minor code duplication across features over premature abstraction. Keep abstractions local to the feature until a global need is proven.
 
+### No Barrel Files
+* **Rule:** Do not create `index.ts` barrel re-export files inside feature directories. Barrel files hurt performance — bundlers must read and process every re-exported module, slowing compilation, dev reloads, and production loads.
+* **Implementation:** Import directly from the source file path. Configure path aliases in your bundler for shorter imports if needed.
+
+```tsx
+// ❌ BAD — barrel import (slows bundler, hurts tree-shaking)
+import { FeatureContainer } from '@/features/my-feature';
+
+// ✅ GOOD — direct import (fast, tree-shakable)
+import { FeatureContainer } from '@/features/my-feature/components/feature-container';
+```
+
+### Named React Imports
+* **Rule:** Always use named imports for React hooks and types. Never use `React.useState`, `React.useEffect`, etc. Named imports are shorter, keep component logic cleaner, and make dependencies explicit.
+* **Implementation:** Use destructured named imports for all React APIs.
+
+```tsx
+// ❌ BAD — namespace access (longer, redundant)
+import React from 'react';
+const [count, setCount] = React.useState(0);
+
+// ✅ GOOD — named imports (concise, explicit)
+import { useState } from 'react';
+const [count, setCount] = useState(0);
+```
+
+Barrel files are acceptable only in **published packages/libraries** where a clean public API is needed for external consumers.
+
 ---
 
 ## 2. Folder Directory Map
@@ -31,8 +59,7 @@ src/
 │       ├── components/   # Feature-specific UI components
 │       ├── hooks/        # Feature-specific hooks
 │       ├── api/          # Domain-specific API calls / data access
-│       ├── types/        # Scoped typescript definitions
-│       └── index.ts      # Clean public API export for the feature
+│       └── schema.ts         # Scoped typescript definitions
 ├── lib/                  # 3rd-party configuration & clients (e.g., axios, prisma)
 ├── styles/               # Global stylesheets (e.g., globals.css)
 └── types/                # Only truly global, systemic TypeScript definitions
@@ -56,7 +83,7 @@ export default function Page() {
 }
 
 // ✅ GOOD: Delegate immediately
-import { FeatureContainer } from '@/features/my-feature';
+import { FeatureContainer } from '@/features/my-feature/components/feature-container';
 
 export default function Page() {
   return <FeatureContainer/>;
@@ -137,7 +164,7 @@ The API route handler is purely a pass-through:
 
 ```ts
 // src/app/api/auth/[...all]/route.ts
-import { auth } from '@/features/auth';
+import { auth } from '@/features/auth/lib/auth';
 import { toNextHandler } from 'better-auth/next-js';
 
 export const { GET, POST } = toNextHandler(auth);

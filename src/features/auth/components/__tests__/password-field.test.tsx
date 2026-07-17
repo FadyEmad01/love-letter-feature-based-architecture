@@ -1,5 +1,6 @@
 import { render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+import type { ComponentProps } from "react";
 import { useState } from "react";
 
 import { PasswordField } from "@/features/auth/components/password-field";
@@ -17,10 +18,7 @@ function getInput(container: HTMLElement): HTMLInputElement {
 
 /** Wrapper that manages controlled `value` / `onChange` state. */
 function ControlledPasswordField(
-  props: Omit<
-    React.ComponentProps<typeof PasswordField>,
-    "value" | "onChange"
-  > & {
+  props: Omit<ComponentProps<typeof PasswordField>, "value" | "onChange"> & {
     initialValue?: string;
   },
 ) {

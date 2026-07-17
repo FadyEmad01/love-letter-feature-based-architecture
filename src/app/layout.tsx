@@ -8,6 +8,7 @@ import {
   Merriweather,
 } from "next/font/google";
 import localFont from "next/font/local";
+import type { ReactNode } from "react";
 import { GooeyToaster } from "@/components/ui/goey-toaster";
 import "../styles/globals.css";
 import "goey-toast/styles.css";
@@ -59,7 +60,7 @@ export const metadata: Metadata = {
 export default function RootLayout({
   children,
 }: Readonly<{
-  children: React.ReactNode;
+  children: ReactNode;
 }>) {
   return (
     <html

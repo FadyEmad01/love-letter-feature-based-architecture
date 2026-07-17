@@ -1,7 +1,5 @@
-import HeroSection from "@/features/landing/components/hero-section";
+import LandingPage from "@/features/landing/components/landingPage";
 
 export default function Home() {
-  return <>
-    <HeroSection />
-  </>;
+  return <LandingPage />;
 }

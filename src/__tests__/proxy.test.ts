@@ -181,7 +181,7 @@ describe("proxy middleware", () => {
   describe("config", () => {
     it("targets all routes except static assets and API", () => {
       expect(config.matcher).toEqual([
-        "/((?!api|_next/static|_next/image|favicon.ico|texture/).*)",
+        "/((?!api|_next/static|_next/image|favicon.ico|texture/|gif/).*)",
       ]);
     });
   });

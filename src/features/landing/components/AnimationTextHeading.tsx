@@ -2,22 +2,7 @@
 
 import { AnimatePresence, motion } from "motion/react";
 import { useEffect, useState } from "react";
-
-interface TextContent {
-  scriptTop?: string;
-  block1?: string;
-  block2?: string;
-  scriptBottom?: string;
-}
-
-interface AnimationTextHeadingProps {
-  text?: TextContent;
-  autoExit?: boolean;
-  exitDelay?: number;
-  staggerDelay?: number;
-  startDelay?: number;
-  onComplete?: () => void; // <-- Added onComplete prop
-}
+import type { AnimationTextHeadingProps, TextContent } from "../types";
 
 const defaultText: TextContent = {
   scriptTop: "The",
@@ -99,7 +84,7 @@ export default function AnimationTextHeading({
           >
             <motion.div
               variants={scriptTextVariants}
-              className="font-great-vibes absolute -left-[15%] -top-[20%] z-20 -rotate-[8deg] text-7xl text-[#F9D5D3] drop-shadow-sm md:-top-[25%] md:text-9xl [-webkit-text-stroke:1px_#42201C] md:[-webkit-text-stroke:2px_#42201C]"
+              className="font-great-vibes absolute -left-[15%] -top-[20%] z-20 -rotate-[8deg] text-7xl text-brand-pink drop-shadow-sm md:-top-[25%] md:text-9xl [-webkit-text-stroke:1px_var(--brand-brown)] md:[-webkit-text-stroke:2px_var(--brand-brown)]"
             >
               {text.scriptTop}
             </motion.div>
@@ -108,7 +93,11 @@ export default function AnimationTextHeading({
               variants={blockTextVariants}
               whileHover={{ scale: 1.02 }}
               transition={{ type: "spring", stiffness: 400 }}
-              className="font-anton relative z-10 text-[5.5rem] uppercase leading-[0.85] tracking-wider text-[#FFF7E4] md:text-[10rem] cursor-default [-webkit-text-stroke:1px_#42201C] md:[-webkit-text-stroke:2px_#42201C] [text-shadow:1px_1px_0_#42201C,2px_2px_0_#42201C,3px_3px_0_#42201C,4px_4px_0_#42201C] md:[text-shadow:1px_1px_0_#42201C,2px_2px_0_#42201C,3px_3px_0_#42201C,4px_4px_0_#42201C,5px_5px_0_#42201C,6px_6px_0_#42201C,7px_7px_0_#42201C,8px_8px_0_#42201C]"
+              className="font-anton relative z-10 text-[5.5rem] uppercase leading-[0.85] tracking-wider text-brand-cream md:text-[10rem] cursor-default [-webkit-text-stroke:1px_var(--brand-brown)] md:[-webkit-text-stroke:2px_var(--brand-brown)]"
+              style={{
+                textShadow:
+                  "1px 1px 0 var(--brand-brown), 2px 2px 0 var(--brand-brown), 3px 3px 0 var(--brand-brown), 4px 4px 0 var(--brand-brown), 5px 5px 0 var(--brand-brown), 6px 6px 0 var(--brand-brown), 7px 7px 0 var(--brand-brown), 8px 8px 0 var(--brand-brown)",
+              }}
             >
               {text.block1}
             </motion.div>
@@ -117,14 +106,18 @@ export default function AnimationTextHeading({
               variants={blockTextVariants}
               whileHover={{ scale: 1.02 }}
               transition={{ type: "spring", stiffness: 400 }}
-              className="font-anton relative z-10 -mt-2 text-[6rem] uppercase leading-[0.85] tracking-normal text-[#FFF7E4] md:-mt-4 md:text-[11rem] cursor-default [-webkit-text-stroke:1px_#42201C] md:[-webkit-text-stroke:2px_#42201C] [text-shadow:1px_1px_0_#42201C,2px_2px_0_#42201C,3px_3px_0_#42201C,4px_4px_0_#42201C] md:[text-shadow:1px_1px_0_#42201C,2px_2px_0_#42201C,3px_3px_0_#42201C,4px_4px_0_#42201C,5px_5px_0_#42201C,6px_6px_0_#42201C,7px_7px_0_#42201C,8px_8px_0_#42201C]"
+              className="font-anton relative z-10 -mt-2 text-[6rem] uppercase leading-[0.85] tracking-normal text-brand-cream md:-mt-4 md:text-[11rem] cursor-default [-webkit-text-stroke:1px_var(--brand-brown)] md:[-webkit-text-stroke:2px_var(--brand-brown)]"
+              style={{
+                textShadow:
+                  "1px 1px 0 var(--brand-brown), 2px 2px 0 var(--brand-brown), 3px 3px 0 var(--brand-brown), 4px 4px 0 var(--brand-brown), 5px 5px 0 var(--brand-brown), 6px 6px 0 var(--brand-brown), 7px 7px 0 var(--brand-brown), 8px 8px 0 var(--brand-brown)",
+              }}
             >
               {text.block2}
             </motion.div>
 
             <motion.div
               variants={scriptTextVariants}
-              className="font-great-vibes absolute -bottom-[35%] left-1/2 z-30 -translate-x-[40%] -rotate-[8deg] text-7xl text-[#F9D5D3] drop-shadow-sm md:-bottom-[45%] md:text-[11rem] [-webkit-text-stroke:1px_#42201C] md:[-webkit-text-stroke:2px_#42201C]"
+              className="font-great-vibes absolute -bottom-[35%] left-1/2 z-30 -translate-x-[40%] -rotate-[8deg] text-7xl text-brand-pink drop-shadow-sm md:-bottom-[45%] md:text-[11rem] [-webkit-text-stroke:1px_var(--brand-brown)] md:[-webkit-text-stroke:2px_var(--brand-brown)]"
             >
               {text.scriptBottom}
             </motion.div>

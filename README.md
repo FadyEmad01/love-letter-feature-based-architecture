@@ -33,6 +33,36 @@ Every business domain lives in `src/features/[feature-name]`. **If a feature fol
 
 Code only moves to the global `src/components/` or `src/lib/` directories **if it is actively used by at least two distinct features**. Minor duplication across features is preferred over premature abstraction. Keep code local to the feature until a global need is proven.
 
+### No Barrel Files
+
+**Rule:** Do not create `index.ts` barrel re-export files inside feature directories. Barrel files hurt performance — bundlers must read and process every re-exported module, slowing compilation, dev reloads, and production loads.
+
+**Implementation:** Import directly from the source file path. Configure path aliases in your bundler for shorter imports if needed.
+
+```tsx
+// ❌ BAD — barrel import (slows bundler, hurts tree-shaking)
+import { FeatureContainer } from '@/features/my-feature';
+
+// ✅ GOOD — direct import (fast, tree-shakable)
+import { FeatureContainer } from '@/features/my-feature/components/feature-container';
+```
+
+### Named React Imports
+
+**Rule:** Always use named imports for React hooks and types. Never use `React.useState`, `React.useEffect`, etc. Named imports are shorter, keep component logic cleaner, and make dependencies explicit.
+
+```tsx
+// ❌ BAD — namespace access (longer, redundant)
+import React from 'react';
+const [count, setCount] = React.useState(0);
+
+// ✅ GOOD — named imports (concise, explicit)
+import { useState } from 'react';
+const [count, setCount] = useState(0);
+```
+
+Barrel files are acceptable only in **published packages/libraries** where a clean public API is needed for external consumers.
+
 ---
 
 ## Directory Structure
@@ -58,14 +88,12 @@ src/
 │   ├── auth/                 # Authentication Feature
 │   │   ├── lib/              # Auth config: auth.ts (server), auth-client.ts (client), validation.ts
 │   │   ├── components/       # Login/Register forms, PasswordField, SignOutButton
-│   │   ├── schema.ts         # Auth Drizzle tables (user, session, account, verification)
-│   │   └── index.ts          # Barrel exports
+│   │   └── schema.ts         # Auth Drizzle tables (user, session, account, verification)
 │   └── [feature-name]/
 │       ├── components/       # Feature UI
 │       ├── hooks/            # Feature hooks (Zustand stores, TanStack Query)
 │       ├── api/              # Server Actions & fetch logic
-│       ├── schema.ts         # Feature-specific Drizzle schema definitions
-│       └── index.ts          # Public API barrel file
+│       └── schema.ts         # Feature-specific Drizzle schema definitions
 │
 ├── lib/                      # UTILITIES (Shared database connection, cn util)
 │   ├── db.ts                 # Global Drizzle/Neon DB client instance
@@ -97,7 +125,7 @@ export default function Page() {
 }
 
 // ✅ GOOD — delegate immediately to the feature
-import { FeatureContainer } from '@/features/my-feature';
+import { FeatureContainer } from '@/features/my-feature/components/feature-container';
 
 export default function Page() {
   return <FeatureContainer />;
@@ -175,7 +203,7 @@ The API route handler is purely a pass-through using `toNextJsHandler`:
 
 ```ts
 // src/app/api/auth/[...all]/route.ts
-import { auth } from '@/features/auth';
+import { auth } from '@/features/auth/lib/auth';
 import { toNextJsHandler } from 'better-auth/next-js';
 
 export const { GET, POST } = toNextJsHandler(auth);

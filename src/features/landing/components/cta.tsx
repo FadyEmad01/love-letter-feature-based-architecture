@@ -1,22 +1,8 @@
 import { cva } from "class-variance-authority";
+import Link from "next/link";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-
-type ButtonVariant =
-  | "default"
-  | "destructive"
-  | "outline"
-  | "secondary"
-  | "ghost"
-  | "link";
-
-export interface CtaProps {
-  ctaEnabled?: boolean;
-  text: string;
-  link: string;
-  variant?: ButtonVariant;
-  size?: "default" | "sm" | "lg";
-}
+import type { CtaProps } from "../types";
 
 const ctaVariants = cva("w-fit rounded-full px-4", {
   variants: {
@@ -54,7 +40,7 @@ export function Cta({
   }
 
   return (
-    <a
+    <Link
       href={cta.link}
       className={cn(
         buttonVariants({
@@ -65,6 +51,6 @@ export function Cta({
       )}
     >
       {cta.text}
-    </a>
+    </Link>
   );
 }

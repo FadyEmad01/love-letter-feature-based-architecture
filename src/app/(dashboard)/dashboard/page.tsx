@@ -1,7 +1,7 @@
 import { cookies, headers } from "next/headers";
 import { redirect } from "next/navigation";
-import { auth } from "@/features/auth";
-import { DashboardView } from "@/features/dashboard";
+import { auth } from "@/features/auth/lib/auth";
+import { DashboardView } from "@/features/dashboard/components/dashboard-view";
 
 export default async function DashboardPage() {
   const session = await auth.api.getSession({
