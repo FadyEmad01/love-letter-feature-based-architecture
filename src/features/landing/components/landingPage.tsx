@@ -1,6 +1,6 @@
 "use client";
 
-import bgImage from "../assets/images/bg-hero.webp";
+import bgImage from "@/assets/images/bg-hero.webp";
 import { LANDING_CONTENT } from "../constants";
 import { HeroSection } from "./hero-section";
 

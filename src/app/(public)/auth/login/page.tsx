@@ -1,4 +1,4 @@
-import Image from "next/image";
+import { AuthImagePanel } from "@/features/auth/components/auth-image-panel";
 import LoginForm from "@/features/auth/components/login-form";
 
 export default function LoginPage() {
@@ -12,22 +12,7 @@ export default function LoginPage() {
           </div>
         </div>
       </div>
-      <div className="relative hidden bg-muted lg:flex min-h-svh items-center justify-center">
-        <Image
-          src="/images/bg-hero.webp"
-          alt="Background"
-          fill
-          sizes="50vw"
-          className="object-cover brightness-[0.6]"
-        />
-        <Image
-          src="/svg/logo.svg"
-          alt="Logo"
-          width={320}
-          height={320}
-          className="relative z-10"
-        />
-      </div>
+      <AuthImagePanel />
     </div>
   );
 }
