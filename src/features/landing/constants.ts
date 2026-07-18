@@ -36,8 +36,8 @@ export const ANIMATION_TIMING = {
   DELAY_CHILDREN: 6.45,
 } as const;
 
-/** Path to the ink mask GIF used in the intro animation */
-export const INK_MASK_PATH = "/gif/ink.gif";
+/** Path to the ink mask animated WebP used in the intro animation */
+export const INK_MASK_PATH = "/gif/ink.webp";
 
 /** sessionStorage key for tracking whether the intro has been seen */
 export const SESSION_STORAGE_KEY = "landing-intro-seen";
