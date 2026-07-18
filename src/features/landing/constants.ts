@@ -10,7 +10,7 @@ export const LANDING_CONTENT = {
   primaryCTA: {
     ctaEnabled: true,
     text: "Explore Now",
-    link: "/auth/register",
+    link: "/auth/login",
     variant: "default" as const,
     size: "lg" as const,
   },
