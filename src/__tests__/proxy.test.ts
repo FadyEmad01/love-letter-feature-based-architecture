@@ -6,9 +6,24 @@ vi.mock("better-auth/cookies", () => ({
   getSessionCookie: vi.fn(),
 }));
 
+vi.mock("@/features/auth/lib/auth", () => ({
+  auth: {
+    api: {
+      getSession: vi.fn(),
+    },
+  },
+}));
+
 import { getSessionCookie } from "better-auth/cookies";
+import { auth } from "@/features/auth/lib/auth";
 
 const mockGetSessionCookie = vi.mocked(getSessionCookie);
+const mockGetSession = vi.mocked(auth.api.getSession);
+
+const validSession = {
+  session: { id: "session-123" },
+  user: { id: "user-123", name: "Test", email: "test@test.com" },
+};
 
 function createRequest(path: string): NextRequest {
   return new NextRequest(new URL(path, "http://localhost:3000"));
@@ -73,6 +88,7 @@ describe("proxy middleware", () => {
 
     it("does not redirect other routes when MAINTENANCE_MODE is not set", async () => {
       mockGetSessionCookie.mockReturnValue("valid-session");
+      mockGetSession.mockResolvedValue(validSession);
 
       const response = await proxy(createRequest("/dashboard"));
 
@@ -82,6 +98,7 @@ describe("proxy middleware", () => {
     it("does not redirect other routes when MAINTENANCE_MODE is 'false'", async () => {
       process.env.MAINTENANCE_MODE = "false";
       mockGetSessionCookie.mockReturnValue("valid-session");
+      mockGetSession.mockResolvedValue(validSession);
 
       const response = await proxy(createRequest("/dashboard"));
 
@@ -122,6 +139,7 @@ describe("proxy middleware", () => {
   describe("auth page protection", () => {
     it("redirects logged-in user from /auth/login to /dashboard", async () => {
       mockGetSessionCookie.mockReturnValue("valid-session");
+      mockGetSession.mockResolvedValue(validSession);
 
       const response = await proxy(createRequest("/auth/login"));
 
@@ -134,6 +152,7 @@ describe("proxy middleware", () => {
 
     it("redirects logged-in user from /auth/register to /dashboard", async () => {
       mockGetSessionCookie.mockReturnValue("valid-session");
+      mockGetSession.mockResolvedValue(validSession);
 
       const response = await proxy(createRequest("/auth/register"));
 
@@ -142,6 +161,26 @@ describe("proxy middleware", () => {
       expect(response.headers.get("location")).toBe(
         "http://localhost:3000/dashboard",
       );
+    });
+
+    it("stays on /auth/login when cookie exists but session is expired", async () => {
+      mockGetSessionCookie.mockReturnValue("expired-session");
+      mockGetSession.mockResolvedValue(null);
+
+      const response = await proxy(createRequest("/auth/login"));
+
+      expect(response.status).toBe(200);
+      expect(mockGetSession).toHaveBeenCalledOnce();
+    });
+
+    it("stays on /auth/register when cookie exists but session is expired", async () => {
+      mockGetSessionCookie.mockReturnValue("expired-session");
+      mockGetSession.mockResolvedValue(null);
+
+      const response = await proxy(createRequest("/auth/register"));
+
+      expect(response.status).toBe(200);
+      expect(mockGetSession).toHaveBeenCalledOnce();
     });
   });
 
@@ -157,12 +196,27 @@ describe("proxy middleware", () => {
       );
     });
 
-    it("passes through when session cookie exists", async () => {
+    it("passes through when session cookie exists and session is valid", async () => {
       mockGetSessionCookie.mockReturnValue("valid-session");
+      mockGetSession.mockResolvedValue(validSession);
 
       const response = await proxy(createRequest("/dashboard"));
 
       expect(response.status).toBe(200);
+    });
+
+    it("redirects to /auth/login when cookie exists but session is expired", async () => {
+      mockGetSessionCookie.mockReturnValue("expired-session");
+      mockGetSession.mockResolvedValue(null);
+
+      const response = await proxy(createRequest("/dashboard"));
+
+      expect(response.status).toBeGreaterThanOrEqual(300);
+      expect(response.status).toBeLessThan(400);
+      expect(response.headers.get("location")).toBe(
+        "http://localhost:3000/auth/login",
+      );
+      expect(mockGetSession).toHaveBeenCalledOnce();
     });
 
     it("redirects to the correct origin for the request", async () => {
@@ -175,13 +229,19 @@ describe("proxy middleware", () => {
         "https://example.com/auth/login",
       );
     });
+
+    it("does not call getSession when no cookie is present", async () => {
+      await proxy(createRequest("/dashboard"));
+
+      expect(mockGetSession).not.toHaveBeenCalled();
+    });
   });
 
   // ─── Config ──────────────────────────────────────────────
   describe("config", () => {
     it("targets all routes except static assets and API", () => {
       expect(config.matcher).toEqual([
-        "/((?!api|_next/static|_next/image|favicon.ico|texture/|gif/).*)",
+        "/((?!api|_next/static|_next/image|favicon.ico|texture/|gif/|svg/).*)",
       ]);
     });
   });
