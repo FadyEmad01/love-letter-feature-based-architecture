@@ -12,6 +12,7 @@ export default function LandingPage() {
         title={LANDING_CONTENT.hero.title}
         description={LANDING_CONTENT.hero.description}
         landscapeImage={bgImage.src}
+        landscapeBlurDataURL={bgImage.blurDataURL}
         landscapeAlt={LANDING_CONTENT.hero.landscapeAlt}
         animation="subtle"
         variant="standard"

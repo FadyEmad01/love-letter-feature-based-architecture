@@ -14,11 +14,12 @@ export interface CtaProps {
   size?: "default" | "sm" | "lg";
 }
 
-export interface Hero05Props {
+export interface HeroProps {
   tagline: string;
   title: string;
   description: string;
   landscapeImage: string;
+  landscapeBlurDataURL?: string;
   landscapeAlt?: string;
   animation?: "none" | "subtle";
   primaryCTA?: CtaProps;

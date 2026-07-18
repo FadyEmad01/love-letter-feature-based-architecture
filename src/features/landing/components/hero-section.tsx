@@ -6,7 +6,7 @@ import type { ReactNode } from "react";
 import { cn } from "@/lib/utils";
 import { ANIMATION_TIMING, INK_MASK_PATH } from "../constants";
 import { useIntroPhase } from "../hooks/use-intro-phase";
-import type { Hero05Props } from "../types";
+import type { HeroProps } from "../types";
 import AnimationTextHeading from "./AnimationTextHeading";
 import { Cta } from "./cta";
 
@@ -128,12 +128,13 @@ export function HeroSection({
   title,
   description,
   landscapeImage,
+  landscapeBlurDataURL,
   landscapeAlt = "",
   animation = "none",
   primaryCTA,
   secondaryCTA,
   variant = "standard",
-}: Readonly<Hero05Props>) {
+}: Readonly<HeroProps>) {
   const reduce = useReducedMotion();
   const animate = animation === "subtle" && !reduce;
   const vs = variantStyles[variant];
@@ -205,6 +206,8 @@ export function HeroSection({
             fill
             priority
             sizes="100vw"
+            placeholder="blur"
+            blurDataURL={landscapeBlurDataURL}
             className="object-cover object-bottom brightness-[0.4] pointer-events-none"
           />
         </div>
@@ -229,6 +232,8 @@ export function HeroSection({
             fill
             priority
             sizes="100vw"
+            placeholder="blur"
+            blurDataURL={landscapeBlurDataURL}
             className="object-cover object-bottom brightness-[0.4] pointer-events-none"
           />
         </div>
