@@ -156,7 +156,7 @@ export default function RegisterForm() {
               showStrength
               aria-invalid={!!passwordError}
             />
-            <FieldError>{passwordError}</FieldError>
+            {/* <FieldError>{passwordError}</FieldError> */}
           </Field>
 
           <Button type="submit" className="w-full" disabled={isLoading}>
