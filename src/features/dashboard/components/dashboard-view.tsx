@@ -1,20 +1,19 @@
 "use client";
 
-import { useIntroPhase } from "../hooks/use-intro-phase";
-import { DashboardIntro } from "./dashboard-intro";
-import { DashboardShell } from "./dashboard-shell";
+import { DashboardIntro } from "@/features/dashboard/components/dashboard-intro";
+import { DashboardShell } from "@/features/dashboard/components/dashboard-shell";
+import { HomeView } from "@/features/dashboard/components/home-view";
+import { useIntroPhase } from "@/features/dashboard/hooks/use-intro-phase";
 
 interface DashboardViewProps {
   sessionId: string;
   userName: string;
-  userEmail: string;
   hasSeenIntro: boolean;
 }
 
 export function DashboardView({
   sessionId,
   userName,
-  userEmail,
   hasSeenIntro,
 }: DashboardViewProps) {
   const { phase, handleIntroComplete, handleExitComplete } = useIntroPhase({
@@ -23,7 +22,11 @@ export function DashboardView({
   });
 
   if (phase === "dashboard") {
-    return <DashboardShell userName={userName} userEmail={userEmail} />;
+    return (
+      <DashboardShell userName={userName}>
+        <HomeView />
+      </DashboardShell>
+    );
   }
 
   return (

@@ -1,7 +1,13 @@
+import type { Metadata } from "next";
 import { cookies, headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { auth } from "@/features/auth/lib/auth";
 import { DashboardView } from "@/features/dashboard/components/dashboard-view";
+
+export const metadata: Metadata = {
+  title: "Dashboard — Lovely Letter",
+  description: "Your dashboard home.",
+};
 
 export default async function DashboardPage() {
   const session = await auth.api.getSession({
@@ -20,7 +26,6 @@ export default async function DashboardPage() {
     <DashboardView
       sessionId={session.session.id}
       userName={session.user.name}
-      userEmail={session.user.email}
       hasSeenIntro={hasSeenIntro}
     />
   );
