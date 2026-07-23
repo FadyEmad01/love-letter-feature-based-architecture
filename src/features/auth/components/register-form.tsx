@@ -85,7 +85,7 @@ export default function RegisterForm() {
       goeyToast.update(toastId, {
         type: "success",
         title: "Account created!",
-        description: "Redirecting to dashboard...",
+        description: "Your account has been created.",
         icon: null,
         ...toastStyle,
       });
