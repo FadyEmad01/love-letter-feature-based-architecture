@@ -13,9 +13,11 @@ import {
   FieldError,
   FieldGroup,
   FieldLabel,
+  FieldSeparator,
 } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { Spinner } from "@/components/ui/spinner";
+import { GoogleIcon } from "@/features/auth/components/google-icon";
 import { PasswordField } from "@/features/auth/components/password-field";
 import { authClient } from "@/features/auth/lib/auth-client";
 import {
@@ -31,9 +33,12 @@ const toastStyle = {
   timing: { displayDuration: 6000 },
 } as const;
 
+const isGoogleEnabled = process.env.NEXT_PUBLIC_GOOGLE_ENABLED === "true";
+
 export default function RegisterForm() {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
+  const [isGoogleLoading, setIsGoogleLoading] = useState(false);
 
   const form = useForm<RegisterInput>({
     resolver: zodResolver(registerSchema),
@@ -41,6 +46,7 @@ export default function RegisterForm() {
       name: "",
       email: "",
       password: "",
+      confirmPassword: "",
     },
     mode: "onChange",
   });
@@ -53,11 +59,8 @@ export default function RegisterForm() {
     });
 
     try {
-      const { error } = await authClient.signUp.email({
-        name: data.name,
-        email: data.email,
-        password: data.password,
-      });
+      const { confirmPassword: _, ...apiData } = data;
+      const { error } = await authClient.signUp.email(apiData);
 
       if (error) {
         const isRateLimited =
@@ -108,9 +111,25 @@ export default function RegisterForm() {
     }
   }
 
+  async function handleGoogleSignIn() {
+    setIsGoogleLoading(true);
+    const { error } = await authClient.signIn.social({
+      provider: "google",
+      callbackURL: "/dashboard",
+    });
+    if (error) {
+      goeyToast("Google sign-in failed", {
+        description: error?.message || "Something went wrong, try again",
+        ...toastStyle,
+      });
+      setIsGoogleLoading(false);
+    }
+  }
+
   const nameError = form.formState.errors.name?.message;
   const emailError = form.formState.errors.email?.message;
   const passwordError = form.formState.errors.password?.message;
+  const confirmPasswordError = form.formState.errors.confirmPassword?.message;
 
   return (
     <div className="flex flex-col gap-6 relative z-100">
@@ -159,9 +178,43 @@ export default function RegisterForm() {
             {/* <FieldError>{passwordError}</FieldError> */}
           </Field>
 
+          <Field data-invalid={!!confirmPasswordError}>
+            <FieldLabel htmlFor="confirmPassword">Confirm Password</FieldLabel>
+            <PasswordField
+              id="confirmPassword"
+              value={form.watch("confirmPassword")}
+              onChange={(value) =>
+                form.setValue("confirmPassword", value, {
+                  shouldValidate: true,
+                })
+              }
+              aria-invalid={!!confirmPasswordError}
+            />
+            <FieldError>{confirmPasswordError}</FieldError>
+          </Field>
+
           <Button type="submit" className="w-full" disabled={isLoading}>
             {isLoading ? "Creating account..." : "Create account"}
           </Button>
+
+          {isGoogleEnabled && (
+            <>
+              <FieldSeparator className="">Or continue with</FieldSeparator>
+
+              <Field>
+                <Button
+                  disabled={isGoogleLoading}
+                  className="bg-white/50 hover:bg-white/70 text-foreground"
+                  variant="default"
+                  type="button"
+                  onClick={handleGoogleSignIn}
+                >
+                  <GoogleIcon className="size-4" />
+                  {isGoogleLoading ? "Redirecting..." : "Sign up with Google"}
+                </Button>
+              </Field>
+            </>
+          )}
         </FieldGroup>
       </form>
       <FieldDescription className="text-center">

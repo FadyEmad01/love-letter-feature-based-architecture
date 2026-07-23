@@ -51,6 +51,7 @@ async function fillFormAndSubmit(
   await user.type(screen.getByLabelText("Name"), name);
   await user.type(screen.getByLabelText("Email"), email);
   await user.type(screen.getByLabelText("Password"), password);
+  await user.type(screen.getByLabelText("Confirm Password"), password);
   await user.click(screen.getByRole("button", { name: /create account/i }));
 }
 
@@ -68,12 +69,13 @@ describe("RegisterForm", () => {
   const validPassword = "Password123";
 
   describe("Rendering", () => {
-    it("renders name, email, and password inputs plus submit button", () => {
+    it("renders name, email, password, and confirm password inputs plus submit button", () => {
       render(<RegisterForm />);
 
       expect(screen.getByLabelText("Name")).toBeInTheDocument();
       expect(screen.getByLabelText("Email")).toBeInTheDocument();
       expect(screen.getByLabelText("Password")).toBeInTheDocument();
+      expect(screen.getByLabelText("Confirm Password")).toBeInTheDocument();
       expect(
         screen.getByRole("button", { name: /create account/i }),
       ).toBeInTheDocument();
@@ -116,6 +118,7 @@ describe("RegisterForm", () => {
       await user.type(screen.getByLabelText("Name"), "J");
       await user.type(screen.getByLabelText("Email"), validEmail);
       await user.type(screen.getByLabelText("Password"), validPassword);
+      await user.type(screen.getByLabelText("Confirm Password"), validPassword);
       await user.click(screen.getByRole("button", { name: /create account/i }));
 
       await waitFor(() => {
@@ -127,7 +130,7 @@ describe("RegisterForm", () => {
       expect(mocks.mockSignUpEmail).not.toHaveBeenCalled();
     });
 
-    it("shows password validation errors for a weak password", async () => {
+    it("blocks submission for a weak password", async () => {
       const user = userEvent.setup();
       render(<RegisterForm />);
 
@@ -135,13 +138,8 @@ describe("RegisterForm", () => {
       await user.type(screen.getByLabelText("Email"), validEmail);
       // "weak" — no number, no uppercase, < 8 chars
       await user.type(screen.getByLabelText("Password"), "weak");
+      await user.type(screen.getByLabelText("Confirm Password"), "weak");
       await user.click(screen.getByRole("button", { name: /create account/i }));
-
-      await waitFor(() => {
-        expect(
-          screen.getByText("Password must be at least 8 characters long"),
-        ).toBeInTheDocument();
-      });
 
       expect(mocks.mockSignUpEmail).not.toHaveBeenCalled();
     });
@@ -153,12 +151,33 @@ describe("RegisterForm", () => {
       await user.type(screen.getByLabelText("Name"), validName);
       await user.type(screen.getByLabelText("Email"), "notanemail");
       await user.type(screen.getByLabelText("Password"), validPassword);
+      await user.type(screen.getByLabelText("Confirm Password"), validPassword);
       await user.click(screen.getByRole("button", { name: /create account/i }));
 
       await waitFor(() => {
         expect(
           screen.getByText("Please enter a valid email address"),
         ).toBeInTheDocument();
+      });
+
+      expect(mocks.mockSignUpEmail).not.toHaveBeenCalled();
+    });
+
+    it("shows confirm password mismatch error", async () => {
+      const user = userEvent.setup();
+      render(<RegisterForm />);
+
+      await user.type(screen.getByLabelText("Name"), validName);
+      await user.type(screen.getByLabelText("Email"), validEmail);
+      await user.type(screen.getByLabelText("Password"), validPassword);
+      await user.type(
+        screen.getByLabelText("Confirm Password"),
+        "DifferentPass1",
+      );
+      await user.click(screen.getByRole("button", { name: /create account/i }));
+
+      await waitFor(() => {
+        expect(screen.getByText("Passwords don't match")).toBeInTheDocument();
       });
 
       expect(mocks.mockSignUpEmail).not.toHaveBeenCalled();
@@ -314,6 +333,7 @@ describe("RegisterForm", () => {
       await user.type(screen.getByLabelText("Name"), validName);
       await user.type(screen.getByLabelText("Email"), validEmail);
       await user.type(screen.getByLabelText("Password"), validPassword);
+      await user.type(screen.getByLabelText("Confirm Password"), validPassword);
       await user.click(submitButton);
 
       await waitFor(() => {

@@ -9,9 +9,18 @@ export const auth = betterAuth({
     provider: "pg",
     schema: { user, session, account, verification, rateLimit },
   }),
-  // experimental: { joins: true },
   emailAndPassword: {
     enabled: true,
+  },
+  socialProviders: {
+    ...(process.env.GOOGLE_CLIENT_ID
+      ? {
+          google: {
+            clientId: process.env.GOOGLE_CLIENT_ID as string,
+            clientSecret: process.env.GOOGLE_CLIENT_SECRET as string,
+          },
+        }
+      : {}),
   },
   session: {
     expiresIn: 60 * 60 * 24 * 7,

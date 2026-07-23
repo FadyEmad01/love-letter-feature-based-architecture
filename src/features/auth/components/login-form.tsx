@@ -13,9 +13,11 @@ import {
   FieldError,
   FieldGroup,
   FieldLabel,
+  FieldSeparator,
 } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { Spinner } from "@/components/ui/spinner";
+import { GoogleIcon } from "@/features/auth/components/google-icon";
 import { PasswordField } from "@/features/auth/components/password-field";
 import { authClient } from "@/features/auth/lib/auth-client";
 import { type LoginInput, loginSchema } from "@/features/auth/lib/validation";
@@ -28,9 +30,12 @@ const toastStyle = {
   timing: { displayDuration: 6000 },
 } as const;
 
+const isGoogleEnabled = process.env.NEXT_PUBLIC_GOOGLE_ENABLED === "true";
+
 export default function LoginForm() {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
+  const [isGoogleLoading, setIsGoogleLoading] = useState(false);
 
   const form = useForm<LoginInput>({
     resolver: zodResolver(loginSchema),
@@ -103,6 +108,21 @@ export default function LoginForm() {
     }
   }
 
+  async function handleGoogleSignIn() {
+    setIsGoogleLoading(true);
+    const { error } = await authClient.signIn.social({
+      provider: "google",
+      callbackURL: "/dashboard",
+    });
+    if (error) {
+      goeyToast("Google sign-in failed", {
+        description: error?.message || "Something went wrong, try again",
+        ...toastStyle,
+      });
+      setIsGoogleLoading(false);
+    }
+  }
+
   const emailError = form.formState.errors.email?.message;
   const passwordError = form.formState.errors.password?.message;
 
@@ -146,6 +166,25 @@ export default function LoginForm() {
           <Button type="submit" className="w-full" disabled={isLoading}>
             {isLoading ? "Signing in..." : "Sign in"}
           </Button>
+
+          {isGoogleEnabled && (
+            <>
+              <FieldSeparator className="">Or continue with</FieldSeparator>
+
+              <Field>
+                <Button
+                  disabled={isGoogleLoading}
+                  className="bg-white/50 hover:bg-white/70 text-foreground"
+                  variant="default"
+                  type="button"
+                  onClick={handleGoogleSignIn}
+                >
+                  <GoogleIcon className="size-4" />
+                  {isGoogleLoading ? "Redirecting..." : "Login with Google"}
+                </Button>
+              </Field>
+            </>
+          )}
         </FieldGroup>
       </form>
       <FieldDescription className="text-center">

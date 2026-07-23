@@ -85,6 +85,7 @@ describe("registerSchema", () => {
     name: "Jane Doe",
     email: "jane@example.com",
     password: "Securepass1",
+    confirmPassword: "Securepass1",
   };
 
   // -- Name -----------------------------------------------------------------
@@ -274,6 +275,7 @@ describe("registerSchema", () => {
       const result = registerSchema.safeParse({
         ...validInput,
         password: "Testpass1",
+        confirmPassword: "Testpass1",
       });
       expect(result.success).toBe(true);
     });
@@ -286,6 +288,7 @@ describe("registerSchema", () => {
         name: "",
         email: "invalid",
         password: "weak",
+        confirmPassword: "",
       });
       expect(result.success).toBe(false);
       if (!result.success) {
@@ -298,6 +301,20 @@ describe("registerSchema", () => {
       expect(result.success).toBe(true);
       if (result.success) {
         expect(result.data).toEqual(validInput);
+      }
+    });
+
+    it("rejects when passwords don't match", () => {
+      const result = registerSchema.safeParse({
+        ...validInput,
+        confirmPassword: "DifferentPass1",
+      });
+      expect(result.success).toBe(false);
+      if (!result.success) {
+        const confirmError = result.error.issues.find((i) =>
+          i.path.includes("confirmPassword"),
+        );
+        expect(confirmError?.message).toBe("Passwords don't match");
       }
     });
   });

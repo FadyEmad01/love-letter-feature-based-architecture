@@ -121,7 +121,7 @@ When managing or creating state, choose the correct tool based on this exact hie
 | **UI Components** | shadcn/ui | Radix primitives + CVA |
 | **State Management** | TanStack Query + Zustand | See State Taxonomy below |
 | **Linting/Formatting** | Biome | Replaces ESLint + Prettier |
-| **Animation** | tw-animate-css | Tailwind animation utilities |
+| **Animation** | tw-animate-css | Tailwind animation utilities | Motion (framer-motion)
 | **Class Utilities** | clsx + tailwind-merge | Combined via `cn()` helper |
 
 ---
